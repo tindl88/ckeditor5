@@ -20,16 +20,13 @@ module.exports = function buildApiDocs() {
 				// 'packages/ckeditor5-utils/src/count.ts',
 				// 'packages/ckeditor5-utils/src/nth.ts'
 
-				// 'packages/ckeditor5-utils/src/count.js',
-				// 'packages/ckeditor5-utils/src/nth.js'
-
-				// 'packages/ckeditor5-utils/src/count.js'
-				// 'packages/@(ckeditor|ckeditor5)-*/src/**/*.ts',
-				// '!packages/@(ckeditor|ckeditor5)-*/src/lib/**/*.ts',
-				// '!packages/ckeditor5-build-*/src/**/*.ts',
-				// 'external/*/packages/@(ckeditor|ckeditor5)-*/src/**/*.ts',
-				// '!external/*/packages/@(ckeditor|ckeditor5)-*/src/lib/**/*.ts',
-				// '!external/*/packages/ckeditor5-build-*/src/**/*.ts'
+				// 'packages/@(ckeditor|ckeditor5)-*/src/**/*.@(js|jsdoc)',
+				// 'packages/@(ckeditor|ckeditor5)-*/_src/**/*.@(js|jsdoc)',
+				// '!packages/@(ckeditor|ckeditor5)-*/src/lib/**/*.js',
+				// '!packages/ckeditor5-build-*/src/**/*.js',
+				// 'external/*/packages/@(ckeditor|ckeditor5)-*/src/**/*.@(js|jsdoc)',
+				// '!external/*/packages/@(ckeditor|ckeditor5)-*/src/lib/**/*.js',
+				// '!external/*/packages/ckeditor5-build-*/src/**/*.js'
 			],
 			validateOnly: process.argv.includes( '--validate-only' ),
 			strict: process.argv.includes( '--strict' )
