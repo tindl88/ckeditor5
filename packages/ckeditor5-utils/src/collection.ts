@@ -90,45 +90,62 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	 */
 	private _skippedIndexesFromExternal: number[];
 
+	/**
+	 * Creates a new Collection instance.
+	 *
+	 * You can first create a collection and then add new items using the {@link #add} method:
+	 *
+	 * ```ts
+	 *	const collection = new Collection();
+	 *
+	 *	collection.add( { id: 'John' } );
+	 *	console.log( collection.get( 0 ) ); // -> { id: 'John' }
+	 * ```
+	 *
+	 * You can always pass a configuration object as the last argument of the constructor:
+	 *
+	 * ```ts
+	 *	const emptyCollection = new Collection( { idProperty: 'name' } );
+	 *	emptyCollection.add( { name: 'John' } );
+	 *	console.log( collection.get( 'John' ) ); // -> { name: 'John' }
+	 *
+	 *	const nonEmptyCollection = new Collection( [ { name: 'John' } ], { idProperty: 'name' } );
+	 *	nonEmptyCollection.add( { name: 'George' } );
+	 *	console.log( collection.get( 'George' ) ); // -> { name: 'George' }
+	 *	console.log( collection.get( 'John' ) ); // -> { name: 'John' }
+	 * ```
+	 */
 	constructor( options?: { readonly idProperty?: I } );
-	constructor( initialItems: Iterable<T>, options?: { readonly idProperty?: I } );
 
 	/**
 	 * Creates a new Collection instance.
 	 *
 	 * You can provide an iterable of initial items the collection will be created with:
 	 *
-	 *		const collection = new Collection( [ { id: 'John' }, { id: 'Mike' } ] );
+	 * ```ts
+	 *	const collection = new Collection( [ { id: 'John' }, { id: 'Mike' } ] );
 	 *
-	 *		console.log( collection.get( 0 ) ); // -> { id: 'John' }
-	 *		console.log( collection.get( 1 ) ); // -> { id: 'Mike' }
-	 *		console.log( collection.get( 'Mike' ) ); // -> { id: 'Mike' }
+	 *	console.log( collection.get( 0 ) ); // -> { id: 'John' }
+	 *	console.log( collection.get( 1 ) ); // -> { id: 'Mike' }
+	 *	console.log( collection.get( 'Mike' ) ); // -> { id: 'Mike' }
+	 * ```
 	 *
-	 * Or you can first create a collection and then add new items using the {@link #add} method:
-	 *
-	 *		const collection = new Collection();
-	 *
-	 *		collection.add( { id: 'John' } );
-	 *		console.log( collection.get( 0 ) ); // -> { id: 'John' }
-	 *
-	 * Whatever option you choose, you can always pass a configuration object as the last argument
+	 * You can always pass a configuration object as the last argument
 	 * of the constructor:
 	 *
-	 *		const emptyCollection = new Collection( { idProperty: 'name' } );
-	 *		emptyCollection.add( { name: 'John' } );
-	 *		console.log( collection.get( 'John' ) ); // -> { name: 'John' }
+	 * ```ts
+	 *	const emptyCollection = new Collection( { idProperty: 'name' } );
+	 *	emptyCollection.add( { name: 'John' } );
+	 *	console.log( collection.get( 'John' ) ); // -> { name: 'John' }
 	 *
-	 *		const nonEmptyCollection = new Collection( [ { name: 'John' } ], { idProperty: 'name' } );
-	 *		nonEmptyCollection.add( { name: 'George' } );
-	 *		console.log( collection.get( 'George' ) ); // -> { name: 'George' }
-	 *		console.log( collection.get( 'John' ) ); // -> { name: 'John' }
-	 *
-	 * @param {Iterable.<Object>|Object} [initialItemsOrOptions] The initial items of the collection or
-	 * the options object.
-	 * @param {Object} [options={}] The options object, when the first argument is an array of initial items.
-	 * @param {String} [options.idProperty='id'] The name of the property which is used to identify an item.
-	 * Items that do not have such a property will be assigned one when added to the collection.
+	 *	const nonEmptyCollection = new Collection( [ { name: 'John' } ], { idProperty: 'name' } );
+	 *	nonEmptyCollection.add( { name: 'George' } );
+	 *	console.log( collection.get( 'George' ) ); // -> { name: 'George' }
+	 *	console.log( collection.get( 'John' ) ); // -> { name: 'John' }
+	 * ```
 	 */
+	constructor( initialItems: Iterable<T>, options?: { readonly idProperty?: I } );
+
 	constructor( initialItemsOrOptions: Iterable<T> | { readonly idProperty?: I } = {}, options: { readonly idProperty?: I } = {} ) {
 		super();
 
