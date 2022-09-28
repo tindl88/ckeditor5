@@ -28,17 +28,19 @@ export const DOCUMENTATION_URL = 'https://ckeditor.com/docs/ckeditor5/latest/sup
  * {@link module:utils/ckeditorerror~logError `logError()`}
  * to improve developers experience and let them see the a working editor as soon as possible.
  *
- *		/**
- *		 * Error thrown when a plugin cannot be loaded due to JavaScript errors, lack of plugins with a given name, etc.
- *		 *
- *		 * @error plugin-load
- *		 * @param pluginName The name of the plugin that could not be loaded.
- *		 * @param moduleName The name of the module which tried to load this plugin.
- *		 * /
- *		throw new CKEditorError( 'plugin-load', {
- *			pluginName: 'foo',
- *			moduleName: 'bar'
- *		} );
+ * ```ts
+ * /**
+ *  * Error thrown when a plugin cannot be loaded due to JavaScript errors, lack of plugins with a given name, etc.
+ *  *
+ *  * @error plugin-load
+ *  * @param {String} pluginName The name of the plugin that could not be loaded.
+ *  * @param {String} moduleName The name of the module which tried to load this plugin.
+ *  *\/
+ * throw new CKEditorError( 'plugin-load', null, {
+ *	pluginName: 'foo',
+ *	moduleName: 'bar'
+ * } );
+ * ```
  *
  * @extends Error
  */
