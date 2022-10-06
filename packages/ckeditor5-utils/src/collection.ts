@@ -773,37 +773,27 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	public [ Symbol.iterator ](): Iterator<T> {
 		return this._items[ Symbol.iterator ]();
 	}
-
-	/**
-	 * Fired when an item is added to the collection.
-	 *
-	 * @event add
-	 * @param {Object} item The added item.
-	 */
-
-	/**
-	 * Fired when the collection was changed due to adding or removing items.
-	 *
-	 * @event change
-	 * @param {Iterable.<Object>} added A list of added items.
-	 * @param {Iterable.<Object>} removed A list of removed items.
-	 * @param {Number} index An index where the addition or removal occurred.
-	 */
-
-	/**
-	 * Fired when an item is removed from the collection.
-	 *
-	 * @event remove
-	 * @param {Object} item The removed item.
-	 * @param {Number} index Index from which item was removed.
-	 */
 }
 
+/**
+ * Fired when an item is added to the collection.
+ *
+ * @eventName add
+ * @param {Object} item The added item.
+ */
 export type AddEvent<T = any> = {
 	name: 'add';
 	args: [ item: T, index: number ];
 };
 
+/**
+ * Fired when the collection was changed due to adding or removing items.
+ *
+ * @eventName change
+ * @param {Iterable.<Object>} added A list of added items.
+ * @param {Iterable.<Object>} removed A list of removed items.
+ * @param {Number} index An index where the addition or removal occurred.
+ */
 export type ChangeEvent<T = any> = {
 	name: 'change';
 	args: [ {
@@ -813,6 +803,13 @@ export type ChangeEvent<T = any> = {
 	} ];
 };
 
+/**
+ * Fired when an item is removed from the collection.
+ *
+ * @eventName remove
+ * @param {Object} item The removed item.
+ * @param {Number} index Index from which item was removed.
+ */
 export type RemoveEvent<T = any> = {
 	name: 'remove';
 	args: [ item: T, index: number ];
