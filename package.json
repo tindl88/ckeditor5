@@ -88,6 +88,7 @@
     "@ckeditor/ckeditor5-dev-webpack-plugin": "^31.0.0",
     "@ckeditor/ckeditor5-export-pdf": ">=1.0.0",
     "@ckeditor/ckeditor5-export-word": ">=1.0.0",
+    "@ckeditor/ckeditor5-import-word": ">=1.0.0",
     "@ckeditor/ckeditor5-inspector": "^4.0.0",
     "@ckeditor/ckeditor5-pagination": ">=1.0.0",
     "@ckeditor/ckeditor5-react": "^3.0.0",
@@ -168,7 +169,7 @@
     "release:clean": "npx rimraf \"packages/ckeditor5-@(utils|engine)/src/**/*.@(js|d.ts)\"",
     "switch-to-dev-dev": "sh ./scripts/switch-to-dev-dev.sh",
     "clean-up-svg-icons": "sh ./scripts/clean-up-svg-icons.sh",
-    "dll:build": "node ./scripts/dll/build-dlls.js",
+    "dll:build": "node ./scripts/dll/build-dlls.js --base-dll-config ./scripts/dll/webpack.config.dll.js",
     "check-dependencies": "ckeditor5-dev-tests-check-dependencies"
   },
   "lint-staged": {
