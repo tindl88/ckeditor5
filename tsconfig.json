@@ -13,6 +13,10 @@
     "moduleResolution": "node"
   },
   "include": [
+    "./packages",
     "./typings/"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }
