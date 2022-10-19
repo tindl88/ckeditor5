@@ -33,7 +33,7 @@ const decoratedOriginal = Symbol( 'decoratedOriginal' );
  * @mixes module:utils/emittermixin~EmitterMixin
  * @implements module:utils/observablemixin~Observable
  */
-export default function ObservableMixin<Base extends abstract new( ...args: any[] ) => Emitter>(
+export default function ObservableMixin<Base extends abstract new( ...args: Array<any> ) => Emitter>(
 	base: Base
 ): {
 	new( ...args: ConstructorParameters<Base> ): InstanceType<Base> & Observable;
@@ -87,7 +87,7 @@ export default function ObservableMixin<Base extends abstract new( ...args: any[
 					// Fire `set` event before the new value will be set to make it possible
 					// to override observable property without affecting `change` event.
 					// See https://github.com/ckeditor/ckeditor5-utils/issues/171.
-					let newValue = this.fire<SetEvent>( `set:${ name }`, name, value, oldValue );
+					let newValue = this.fire<ObservableSetEvent>( `set:${ name }`, name, value, oldValue );
 
 					if ( newValue === undefined ) {
 						newValue = value;
@@ -97,7 +97,7 @@ export default function ObservableMixin<Base extends abstract new( ...args: any[
 					// Note: When properties map has no such own property, then its value is undefined.
 					if ( oldValue !== newValue || !properties!.has( name ) ) {
 						properties!.set( name, newValue );
-						this.fire<ChangeEvent>( `change:${ name }`, name, newValue, oldValue );
+						this.fire<ObservableChangeEvent>( `change:${ name }`, name, newValue, oldValue );
 					}
 				}
 			} );
@@ -105,7 +105,7 @@ export default function ObservableMixin<Base extends abstract new( ...args: any[
 			( this as any )[ name ] = value;
 		}
 
-		public bind( ...bindProperties: string[] ): any {
+		public bind( ...bindProperties: Array<string> ): any {
 			if ( !bindProperties.length || !isStringArray( bindProperties ) ) {
 				/**
 				 * All properties must be strings.
@@ -172,7 +172,7 @@ export default function ObservableMixin<Base extends abstract new( ...args: any[
 			};
 		}
 
-		public unbind( ...unbindProperties: ( keyof this & string )[] ): void {
+		public unbind( ...unbindProperties: Array<keyof this & string> ): void {
 			// Nothing to do here if not inited yet.
 			if ( !( this[ observablePropertiesSymbol ] ) ) {
 				return;
@@ -251,7 +251,7 @@ export default function ObservableMixin<Base extends abstract new( ...args: any[
 				evt.return = originalMethod.apply( this, args );
 			} );
 
-			this[ methodName ] = function( ...args: unknown[] ) {
+			this[ methodName ] = function( ...args: Array<unknown> ) {
 				return this.fire( methodName, args );
 			};
 
@@ -289,7 +289,7 @@ export default function ObservableMixin<Base extends abstract new( ...args: any[
 
 		public [ observablePropertiesSymbol ]?: Map<string, unknown>;
 
-		public [ decoratedMethods ]?: string[];
+		public [ decoratedMethods ]?: Array<string>;
 
 		public [ boundPropertiesSymbol ]?: Map<string, Binding>;
 
@@ -313,7 +313,7 @@ export const Observable = ObservableMixin( Emitter );
 
 interface Binding {
 	property: string;
-	to: [ Observable, string ][];
+	to: Array<[ Observable, string ]>;
 	callback?: Function;
 }
 
@@ -321,11 +321,11 @@ interface BindChainInternal {
 	to: Function;
 	_observable: Observable;
 	_bindings: Map<string, Binding>;
-	_bindProperties: string[];
-	_to: {
+	_bindProperties: Array<string>;
+	_to: Array<{
 		observable: Observable;
-		properties: string[];
-	}[];
+		properties: Array<string>;
+	}>;
 }
 
 // Init symbol properties needed for the observable mechanism to work.
@@ -433,7 +433,7 @@ function initObservable( observable: ObservableInternal ): void {
 //
 // @private
 // @param {...[Observable|String|Function]} args Arguments of the `.to( args )` binding.
-function bindTo( this: BindChainInternal, ...args: ( Observable | string | Function )[] ): void {
+function bindTo( this: BindChainInternal, ...args: Array<Observable | string | Function> ): void {
 	const parsedArgs = parseBindToArgs( ...args );
 	const bindingsKeys = Array.from( this._bindings.keys() );
 	const numberOfBindings = bindingsKeys.length;
@@ -503,7 +503,7 @@ function bindTo( this: BindChainInternal, ...args: ( Observable | string | Funct
 // @param {Array.<Observable>} observables
 // @param {String} attribute
 // @param {Function} callback
-function bindToMany( this: BindChainInternal, observables: Observable[], attribute: string, callback: Function ): void {
+function bindToMany( this: BindChainInternal, observables: Array<Observable>, attribute: string, callback: Function ): void {
 	if ( this._bindings.size > 1 ) {
 		/**
 		 * Binding one attribute to many observables only possible with one attribute.
@@ -527,7 +527,7 @@ function bindToMany( this: BindChainInternal, observables: Observable[], attribu
 // @param {Array.<Observable>} observables
 // @param {String} attribute
 // @returns {Array.<String|Observable>}
-function getBindingTargets( observables: Observable[], attribute: string ): ( Observable | string )[] {
+function getBindingTargets( observables: Array<Observable>, attribute: string ): Array<Observable | string> {
 	const observableAndAttributePairs = observables.map( observable => [ observable, attribute ] );
 
 	// Merge pairs to one-dimension array of observables and attributes.
@@ -539,7 +539,7 @@ function getBindingTargets( observables: Observable[], attribute: string ): ( Ob
 // @private
 // @param {Array} arr An array to be checked.
 // @returns {Boolean}
-function isStringArray( arr: unknown[] ): arr is string[] {
+function isStringArray( arr: Array<unknown> ): arr is Array<string> {
 	return arr.every( a => typeof a == 'string' );
 }
 
@@ -561,7 +561,7 @@ function isStringArray( arr: unknown[] ): arr is string[] {
 // @private
 // @param {...*} args Arguments of {@link Observable#bind}`.to( args )`.
 // @returns {Object}
-function parseBindToArgs( ...args: ( Observable | string | Function )[] ) {
+function parseBindToArgs( ...args: Array<Observable | string | Function> ) {
 	// Eliminate A.bind( 'x' ).to()
 	if ( !args.length ) {
 		/**
@@ -573,7 +573,7 @@ function parseBindToArgs( ...args: ( Observable | string | Function )[] ) {
 	}
 
 	const parsed: { to: BindChainInternal[ '_to' ]; callback?: Function } = { to: [] };
-	let lastObservable: { observable: Observable; properties: string[] };
+	let lastObservable: { observable: Observable; properties: Array<string> };
 
 	if ( typeof args[ args.length - 1 ] == 'function' ) {
 		parsed.callback = args.pop() as Function;
@@ -720,7 +720,7 @@ function attachBindToListeners( observable: ObservableInternal, toBindings: Bind
 		// If there's already a chain between the observables (`observable` listens to
 		// `to.observable`), there's no need to create another `change` event listener.
 		if ( !boundObservables.get( to.observable ) ) {
-			observable.listenTo<ChangeEvent>( to.observable, 'change', ( evt, propertyName ) => {
+			observable.listenTo<ObservableChangeEvent>( to.observable, 'change', ( evt, propertyName ) => {
 				bindings = boundObservables.get( to.observable )![ propertyName ];
 
 				// Note: to.observable will fire for any property change, react
@@ -839,7 +839,7 @@ export interface Observable extends Emitter {
 	 * @param {...String} bindProperties Observable properties that will be bound to other observable(s).
 	 * @returns {Object} The bind chain with the `to()` and `toMany()` methods.
 	 */
-	bind( ...bindProperties: ( keyof this & string )[] ): MultiBindChain;
+	bind( ...bindProperties: Array<keyof this & string> ): MultiBindChain;
 
 	/**
 	 * Removes the binding created with {@link #bind}.
@@ -854,7 +854,7 @@ export interface Observable extends Emitter {
 	 * @param {...String} [unbindProperties] Observable properties to be unbound. All the bindings will
 	 * be released if no properties are provided.
 	 */
-	unbind( ...unbindProperties: ( keyof this & string )[] ): void;
+	unbind( ...unbindProperties: Array<keyof this & string> ): void;
 
 	/**
 	 * Turns the given methods of this object into event-based ones. This means that the new method will fire an event
@@ -918,78 +918,80 @@ export interface Observable extends Emitter {
 	 * @param {String} methodName Name of the method to decorate.
 	 */
 	decorate( methodName: keyof this & string ): void;
+
+	/**
+	 * Fired when a property changed value.
+	 *
+	 *		observable.set( 'prop', 1 );
+	 *
+	 *		observable.on( 'change:prop', ( evt, propertyName, newValue, oldValue ) => {
+	 *			console.log( `${ propertyName } has changed from ${ oldValue } to ${ newValue }` );
+	 *		} );
+	 *
+	 *		observable.prop = 2; // -> 'prop has changed from 1 to 2'
+	 *
+	 * @event change:{property}
+	 * @param {String} name The property name.
+	 * @param {*} value The new property value.
+	 * @param {*} oldValue The previous property value.
+	 */
+
+	/**
+	 * Fired when a property value is going to be set but is not set yet (before the `change` event is fired).
+	 *
+	 * You can control the final value of the property by using
+	 * the {@link module:utils/eventinfo~EventInfo#return event's `return` property}.
+	 *
+	 *		observable.set( 'prop', 1 );
+	 *
+	 *		observable.on( 'set:prop', ( evt, propertyName, newValue, oldValue ) => {
+	 *			console.log( `Value is going to be changed from ${ oldValue } to ${ newValue }` );
+	 *			console.log( `Current property value is ${ observable[ propertyName ] }` );
+	 *
+	 *			// Let's override the value.
+	 *			evt.return = 3;
+	 *		} );
+	 *
+	 *		observable.on( 'change:prop', ( evt, propertyName, newValue, oldValue ) => {
+	 *			console.log( `Value has changed from ${ oldValue } to ${ newValue }` );
+	 *		} );
+	 *
+	 *		observable.prop = 2; // -> 'Value is going to be changed from 1 to 2'
+	 *		                     // -> 'Current property value is 1'
+	 *		                     // -> 'Value has changed from 1 to 3'
+	 *
+	 * **Note:** The event is fired even when the new value is the same as the old value.
+	 *
+	 * @event set:{property}
+	 * @param {String} name The property name.
+	 * @param {*} value The new property value.
+	 * @param {*} oldValue The previous property value.
+	 */
 }
 
 interface ObservableInternal extends Observable {
 	[ observablePropertiesSymbol ]?: Map<string, unknown>;
 
-	[ decoratedMethods ]?: string[];
+	[ decoratedMethods ]?: Array<string>;
 
 	[ boundPropertiesSymbol ]?: Map<string, Binding>;
 
 	[ boundObservablesSymbol]?: Map<Observable, Record<string, Set<Binding>>>;
 }
 
-/**
- * Fired when a property changed value.
- *
- *		observable.set( 'prop', 1 );
- *
- *		observable.on( 'change:prop', ( evt, propertyName, newValue, oldValue ) => {
- *			console.log( `${ propertyName } has changed from ${ oldValue } to ${ newValue }` );
- *		} );
- *
- *		observable.prop = 2; // -> 'prop has changed from 1 to 2'
- *
- * @eventName change:{property}
- * @param {String} name The property name.
- * @param {*} value The new property value.
- * @param {*} oldValue The previous property value.
- */
-export type ChangeEvent<TValue = any> = {
+export type ObservableChangeEvent<TValue = any> = {
 	name: 'change' | `change:${ string }`;
 	args: [ name: string, value: TValue, oldValue: TValue ];
 };
 
-/**
- * Fired when a property value is going to be set but is not set yet (before the `change` event is fired).
- *
- * You can control the final value of the property by using
- * the {@link module:utils/eventinfo~EventInfo#return event's `return` property}.
- *
- *		observable.set( 'prop', 1 );
- *
- *		observable.on( 'set:prop', ( evt, propertyName, newValue, oldValue ) => {
- *			console.log( `Value is going to be changed from ${ oldValue } to ${ newValue }` );
- *			console.log( `Current property value is ${ observable[ propertyName ] }` );
- *
- *			// Let's override the value.
- *			evt.return = 3;
- *		} );
- *
- *		observable.on( 'change:prop', ( evt, propertyName, newValue, oldValue ) => {
- *			console.log( `Value has changed from ${ oldValue } to ${ newValue }` );
- *		} );
- *
- *		observable.prop = 2; // -> 'Value is going to be changed from 1 to 2'
- *		                     // -> 'Current property value is 1'
- *		                     // -> 'Value has changed from 1 to 3'
- *
- * **Note:** The event is fired even when the new value is the same as the old value.
- *
- * @eventName set:{property}
- * @param {String} name The property name.
- * @param {*} value The new property value.
- * @param {*} oldValue The previous property value.
- */
-export type SetEvent<TValue = any> = {
+export type ObservableSetEvent<TValue = any> = {
 	name: 'set' | `set:${ string }`;
 	args: [ name: string, value: TValue, oldValue: TValue ];
 	return: TValue;
 };
 
 export type DecoratedMethodEvent<
-	TObservable extends Observable & { [ N in TName ]: ( ...args: any[] ) => any },
+	TObservable extends Observable & { [ N in TName ]: ( ...args: Array<any> ) => any },
 	TName extends keyof TObservable & string
 > = {
 	name: TName;
@@ -999,9 +1001,9 @@ export type DecoratedMethodEvent<
 
 interface SingleBindChain<TKey extends string, TVal> {
 	toMany<O extends Observable, K extends keyof O>(
-		observables: readonly O[],
+		observables: ReadonlyArray<O>,
 		key: K,
-		callback: ( ...values: O[ K ][] ) => TVal
+		callback: ( ...values: Array<O[ K ]> ) => TVal
 	): void;
 
 	to<O extends Observable & { [ P in TKey ]: TVal }>(
@@ -1113,5 +1115,5 @@ interface DualBindChain<TVal1, TVal2> {
 }
 
 interface MultiBindChain {
-	to<O extends Observable>( observable: O, ...properties: ( keyof O )[] ): void;
+	to<O extends Observable>( observable: O, ...properties: Array<keyof O> ): void;
 }

@@ -48,7 +48,7 @@ export default class Model extends Observable {
 	public readonly document: Document;
 	public readonly schema: Schema;
 
-	private readonly _pendingChanges: { batch: Batch; callback: ( writer: Writer ) => any }[];
+	private readonly _pendingChanges: Array<{ batch: Batch; callback: ( writer: Writer ) => any }>;
 	private _currentWriter: Writer | null;
 
 	constructor() {
@@ -100,7 +100,7 @@ export default class Model extends Observable {
 
 		// Adding operation validation with `highest` priority, so it is called before any other feature would like
 		// to do anything with the operation. If the operation has incorrect parameters it should throw on the earliest occasion.
-		this.on<ApplyOperationEvent>( 'applyOperation', ( evt, args ) => {
+		this.on<ModelApplyOperationEvent>( 'applyOperation', ( evt, args ) => {
 			const operation = args[ 0 ];
 
 			operation._validate();
@@ -785,7 +785,7 @@ export default class Model extends Observable {
 	 */
 	public createPositionFromPath(
 		root: ModelElement | ModelDocumentFragment,
-		path: number[],
+		path: Array<number>,
 		stickiness?: PositionStickiness
 	): ModelPosition {
 		return new ModelPosition( root, path, stickiness );
@@ -1124,9 +1124,9 @@ export default class Model extends Observable {
 	 */
 }
 
-export type ApplyOperationEvent = DecoratedMethodEvent<Model, 'applyOperation'>;
-export type InsertContentEvent = DecoratedMethodEvent<Model, 'insertContent'>;
-export type InsertObjectEvent = DecoratedMethodEvent<Model, 'insertObject'>;
-export type DeleteContentEvent = DecoratedMethodEvent<Model, 'deleteContent'>;
-export type ModifySelectionEvent = DecoratedMethodEvent<Model, 'modifySelection'>;
-export type GetSelectedContentEvent = DecoratedMethodEvent<Model, 'getSelectedContent'>;
+export type ModelApplyOperationEvent = DecoratedMethodEvent<Model, 'applyOperation'>;
+export type ModelInsertContentEvent = DecoratedMethodEvent<Model, 'insertContent'>;
+export type ModelInsertObjectEvent = DecoratedMethodEvent<Model, 'insertObject'>;
+export type ModelDeleteContentEvent = DecoratedMethodEvent<Model, 'deleteContent'>;
+export type ModelModifySelectionEvent = DecoratedMethodEvent<Model, 'modifySelection'>;
+export type ModelGetSelectedContentEvent = DecoratedMethodEvent<Model, 'getSelectedContent'>;

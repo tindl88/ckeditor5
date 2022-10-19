@@ -8,7 +8,7 @@ import type Editor from './editor/editor';
 
 import insertToPriorityArray from '@ckeditor/ckeditor5-utils/src/inserttopriorityarray';
 import { type PriorityString } from '@ckeditor/ckeditor5-utils/src/priorities';
-import { type ChangeEvent } from '@ckeditor/ckeditor5-utils/src/observablemixin';
+import { type ObservableChangeEvent } from '@ckeditor/ckeditor5-utils/src/observablemixin';
 
 /**
  * @module core/multicommand
@@ -39,7 +39,7 @@ import { type ChangeEvent } from '@ckeditor/ckeditor5-utils/src/observablemixin'
  * @extends module:core/command~Command
  */
 export default class MultiCommand extends Command {
-	private _childCommandsDefinitions: { command: Command; priority: PriorityString }[];
+	private _childCommandsDefinitions: Array<{ command: Command; priority: PriorityString }>;
 
 	/**
 	 * @inheritDoc
@@ -68,7 +68,7 @@ export default class MultiCommand extends Command {
 	 *
 	 * @returns {*} The value returned by the {@link module:core/command~Command#execute `command.execute()`}.
 	 */
-	public override execute( ...args: unknown[] ): unknown {
+	public override execute( ...args: Array<unknown> ): unknown {
 		const command = this._getFirstEnabledCommand();
 
 		return !!command && command.execute( args );
@@ -88,7 +88,7 @@ export default class MultiCommand extends Command {
 		insertToPriorityArray( this._childCommandsDefinitions, { command, priority: options.priority || 'normal' } );
 
 		// Change multi command enabled state when one of registered commands changes state.
-		command.on<ChangeEvent<boolean>>( 'change:isEnabled', () => this._checkEnabled() );
+		command.on<ObservableChangeEvent<boolean>>( 'change:isEnabled', () => this._checkEnabled() );
 
 		this._checkEnabled();
 	}

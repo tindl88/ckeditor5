@@ -8,7 +8,7 @@
  */
 
 import CKEditorError from '@ckeditor/ckeditor5-utils/src/ckeditorerror';
-import Collection, { type AddEvent, type RemoveEvent } from '@ckeditor/ckeditor5-utils/src/collection';
+import Collection, { type CollectionAddEvent, type CollectionRemoveEvent } from '@ckeditor/ckeditor5-utils/src/collection';
 import type { EmitterMixinDelegateChain } from '@ckeditor/ckeditor5-utils/src/emittermixin';
 import type View from './view';
 
@@ -67,12 +67,12 @@ export default class ViewCollection extends Collection<View, 'viewUid'> {
 		} );
 
 		// Handle {@link module:ui/view~View#element} in DOM when a new view is added to the collection.
-		this.on<AddEvent<View>>( 'add', ( evt, view, index ) => {
+		this.on<CollectionAddEvent<View>>( 'add', ( evt, view, index ) => {
 			this._renderViewIntoCollectionParent( view, index );
 		} );
 
 		// Handle {@link module:ui/view~View#element} in DOM when a view is removed from the collection.
-		this.on<RemoveEvent<View>>( 'remove', ( evt, view ) => {
+		this.on<CollectionRemoveEvent<View>>( 'remove', ( evt, view ) => {
 			if ( view.element && this._parentElement ) {
 				view.element.remove();
 			}
@@ -144,7 +144,7 @@ export default class ViewCollection extends Collection<View, 'viewUid'> {
 	 * @returns {Function} return.to A function which accepts the destination of
 	 * {@link module:utils/emittermixin~Emitter#delegate delegated} events.
 	 */
-	public override delegate( ...events: string[] ): EmitterMixinDelegateChain {
+	public override delegate( ...events: Array<string> ): EmitterMixinDelegateChain {
 		if ( !events.length || !isStringArray( events ) ) {
 			/**
 			 * All event names must be strings.
@@ -175,14 +175,14 @@ export default class ViewCollection extends Collection<View, 'viewUid'> {
 				}
 
 				// Activate delegating on future views in this collection.
-				this.on<AddEvent<View>>( 'add', ( evt, view ) => {
+				this.on<CollectionAddEvent<View>>( 'add', ( evt, view ) => {
 					for ( const evtName of events ) {
 						view.delegate( evtName ).to( dest );
 					}
 				} );
 
 				// Deactivate delegating when view is removed from this collection.
-				this.on<RemoveEvent<View>>( 'remove', ( evt, view ) => {
+				this.on<CollectionRemoveEvent<View>>( 'remove', ( evt, view ) => {
 					for ( const evtName of events ) {
 						view.stopDelegating( evtName, dest );
 					}
@@ -233,6 +233,6 @@ export default class ViewCollection extends Collection<View, 'viewUid'> {
 // @private
 // @param {Array} arr An array to be checked.
 // @returns {Boolean}
-function isStringArray( arr: unknown[] ): arr is string[] {
+function isStringArray( arr: Array<unknown> ): arr is Array<string> {
 	return arr.every( a => typeof a == 'string' );
 }

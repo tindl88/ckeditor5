@@ -501,7 +501,7 @@ export default class DowncastDispatcher extends Emitter {
 	private _reduceChanges( changes: Iterable<DiffItem> ): Iterable<DiffItem | DiffItemReinsert> {
 		const data: { changes: Iterable<DiffItem | DiffItemReinsert> } = { changes };
 
-		this.fire<ReduceChangesEvent>( 'reduceChanges', data );
+		this.fire<DowncastReduceChangesEvent>( 'reduceChanges', data );
 
 		return data.changes;
 	}
@@ -808,7 +808,7 @@ export default class DowncastDispatcher extends Emitter {
 	 */
 }
 
-export type ReduceChangesEvent = {
+export type DowncastReduceChangesEvent = {
 	name: 'reduceChanges';
 	args: [ data: {
 		changes: Iterable<DiffItem | DiffItemReinsert>;
@@ -888,7 +888,7 @@ function shouldMarkerChangeBeConverted(
 	ancestors.shift(); // Remove root element. It cannot be passed to `model.Range#containsItem`.
 	ancestors.reverse();
 
-	const hasCustomHandling = ( ancestors as Element[] ).some( element => {
+	const hasCustomHandling = ( ancestors as Array<Element> ).some( element => {
 		if ( range.containsItem( element ) ) {
 			const viewElement = mapper.toViewElement( element )!;
 

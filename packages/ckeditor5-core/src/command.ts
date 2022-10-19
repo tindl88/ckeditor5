@@ -8,7 +8,12 @@
  */
 
 import type EventInfo from '@ckeditor/ckeditor5-utils/src/eventinfo';
-import { Observable, type ChangeEvent, type DecoratedMethodEvent, type SetEvent } from '@ckeditor/ckeditor5-utils/src/observablemixin';
+import {
+	Observable,
+	type ObservableChangeEvent,
+	type DecoratedMethodEvent,
+	type ObservableSetEvent
+} from '@ckeditor/ckeditor5-utils/src/observablemixin';
 import type Editor from './editor/editor';
 
 /**
@@ -28,11 +33,11 @@ import type Editor from './editor/editor';
  */
 export default class Command extends Observable {
 	public readonly editor: Editor;
-	public readonly affectsData: boolean;
 
 	declare public value: unknown;
 	declare public isEnabled: boolean;
 
+	private _affectsData: boolean;
 	private readonly _disableStack: Set<string>;
 
 	/**
@@ -121,7 +126,7 @@ export default class Command extends Observable {
 		 * @default true
 		 * @member {Boolean} #affectsData
 		 */
-		this.affectsData = true;
+		this._affectsData = true;
 
 		/**
 		 * Holds identifiers for {@link #forceDisabled} mechanism.
@@ -138,20 +143,28 @@ export default class Command extends Observable {
 			this.refresh();
 		} );
 
-		this.on<ExecuteEvent>( 'execute', evt => {
+		this.on<CommandExecuteEvent>( 'execute', evt => {
 			if ( !this.isEnabled ) {
 				evt.stop();
 			}
 		}, { priority: 'high' } );
 
 		// By default commands are disabled when the editor is in read-only mode.
-		this.listenTo<ChangeEvent<boolean>>( editor, 'change:isReadOnly', ( evt, name, value ) => {
+		this.listenTo<ObservableChangeEvent<boolean>>( editor, 'change:isReadOnly', ( evt, name, value ) => {
 			if ( value && this.affectsData ) {
 				this.forceDisabled( 'readOnlyMode' );
 			} else {
 				this.clearForceDisabled( 'readOnlyMode' );
 			}
 		} );
+	}
+
+	public get affectsData(): boolean {
+		return this._affectsData;
+	}
+
+	protected set affectsData( affectsData: boolean ) {
+		this._affectsData = affectsData;
 	}
 
 	/**
@@ -205,7 +218,7 @@ export default class Command extends Observable {
 		this._disableStack.add( id );
 
 		if ( this._disableStack.size == 1 ) {
-			this.on<SetEvent<boolean>>( 'set:isEnabled', forceDisable, { priority: 'highest' } );
+			this.on<ObservableSetEvent<boolean>>( 'set:isEnabled', forceDisable, { priority: 'highest' } );
 			this.isEnabled = false;
 		}
 	}
@@ -240,7 +253,7 @@ export default class Command extends Observable {
 	 *
 	 * @fires execute
 	 */
-	public execute( ...args: unknown[] ): unknown { return undefined; }
+	public execute( ...args: Array<unknown> ): unknown { return undefined; }
 
 	/**
 	 * Destroys the command.
@@ -268,4 +281,4 @@ function forceDisable( evt: EventInfo<string, boolean> ) {
 	evt.stop();
 }
 
-export type ExecuteEvent = DecoratedMethodEvent<Command, 'execute'>;
+export type CommandExecuteEvent = DecoratedMethodEvent<Command, 'execute'>;

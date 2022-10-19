@@ -10,7 +10,7 @@
  */
 
 import TypeCheckable from './typecheckable';
-import Selection, { type ChangeEvent as SelectionChangeEvent } from './selection';
+import Selection, { type ViewSelectionChangeEvent } from './selection';
 
 import EmitterMixin from '@ckeditor/ckeditor5-utils/src/emittermixin';
 
@@ -195,7 +195,7 @@ export default class DocumentSelection extends EmitterMixin( TypeCheckable ) {
 	 *
 	 * @protected
 	 */
-	public get _ranges(): Range[] {
+	public get _ranges(): Array<Range> {
 		return ( this._selection as any )._ranges;
 	}
 
@@ -399,4 +399,4 @@ DocumentSelection.prototype.is = function( type: string ): boolean {
 		type == 'view:documentSelection';
 };
 
-export type ChangeEvent = SelectionChangeEvent;
+export type ViewDocumentSelectionChangeEvent = ViewSelectionChangeEvent;

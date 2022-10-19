@@ -519,7 +519,7 @@ export default class DataController extends Emitter {
 	 * @param {Array.<String>} rootNames Root names to check.
 	 * @returns {Boolean} Whether all provided root names are existing editor roots.
 	 */
-	private _checkIfRootsExists( rootNames: string[] ): boolean {
+	private _checkIfRootsExists( rootNames: Array<string> ): boolean {
 		for ( const rootName of rootNames ) {
 			if ( !this.model.document.getRootNames().includes( rootName ) ) {
 				return false;
@@ -571,7 +571,7 @@ export default class DataController extends Emitter {
 // at element boundary, it is considered as contained inside the element and marker range is returned. Otherwise, if the marker is
 // intersecting with the element, the intersection is returned.
 function _getMarkersRelativeToElement( element: ModelElement ): Map<string, ModelRange> {
-	const result: [ string, ModelRange ][] = [];
+	const result: Array<[ string, ModelRange ]> = [];
 	const doc = element.root.document;
 
 	if ( !doc ) {
@@ -639,3 +639,21 @@ function _getMarkersRelativeToElement( element: ModelElement ): Map<string, Mode
 
 	return new Map( result );
 }
+
+export type DataControllerInitEvent = {
+	name: 'init';
+	args: [ Parameters<DataController[ 'init' ]> ];
+	return: ReturnType<DataController[ 'init' ]>;
+};
+
+export type DataControllerSetEvent = {
+	name: 'set';
+	args: [ Parameters<DataController[ 'set' ]> ];
+	return: ReturnType<DataController[ 'set' ]>;
+};
+
+export type DataControllerGetEvent = {
+	name: 'get';
+	args: [ Parameters<DataController[ 'get' ]> ];
+	return: ReturnType<DataController[ 'get' ]>;
+};

@@ -37,7 +37,7 @@ export default class Selection extends EmitterMixin( TypeCheckable ) {
 	protected _attrs: Map<string, unknown>;
 
 	/** @internal */
-	public _ranges: Range[];
+	public _ranges: Array<Range>;
 
 	/**
 	 * Creates a new selection instance based on the given {@link module:engine/model/selection~Selectable selectable}
@@ -507,7 +507,7 @@ export default class Selection extends EmitterMixin( TypeCheckable ) {
 
 		this._lastRangeBackward = !!isLastBackward;
 
-		this.fire<ChangeRangeEvent>( 'change:range', { directChange: true } );
+		this.fire<SelectionChangeRangeEvent>( 'change:range', { directChange: true } );
 	}
 
 	/**
@@ -551,7 +551,7 @@ export default class Selection extends EmitterMixin( TypeCheckable ) {
 			this._lastRangeBackward = false;
 		}
 
-		this.fire<ChangeRangeEvent>( 'change:range', { directChange: true } );
+		this.fire<SelectionChangeRangeEvent>( 'change:range', { directChange: true } );
 	}
 
 	/**
@@ -608,7 +608,7 @@ export default class Selection extends EmitterMixin( TypeCheckable ) {
 		if ( this.hasAttribute( key ) ) {
 			this._attrs.delete( key );
 
-			this.fire<ChangeAttributeEvent>( 'change:attribute', { attributeKeys: [ key ], directChange: true } );
+			this.fire<SelectionChangeAttributeEvent>( 'change:attribute', { attributeKeys: [ key ], directChange: true } );
 		}
 	}
 
@@ -626,7 +626,7 @@ export default class Selection extends EmitterMixin( TypeCheckable ) {
 		if ( this.getAttribute( key ) !== value ) {
 			this._attrs.set( key, value );
 
-			this.fire<ChangeAttributeEvent>( 'change:attribute', { attributeKeys: [ key ], directChange: true } );
+			this.fire<SelectionChangeAttributeEvent>( 'change:attribute', { attributeKeys: [ key ], directChange: true } );
 		}
 	}
 
@@ -781,7 +781,7 @@ export default class Selection extends EmitterMixin( TypeCheckable ) {
 	 * @param {Array.<module:engine/model/range~Range>} ranges
 	 * @protected
 	 */
-	protected _replaceAllRanges( ranges: Range[] ): void {
+	protected _replaceAllRanges( ranges: Array<Range> ): void {
 		this._removeAllRanges();
 
 		for ( const range of ranges ) {
@@ -856,26 +856,26 @@ Selection.prototype.is = function( type: string ): boolean {
 	return type === 'selection' || type === 'model:selection';
 };
 
-export type ChangeEvent = {
+export type SelectionChangeEvent = {
 	name: 'change' | 'change:range' | 'change:attribute';
 	args: [ {
 		directChange: boolean;
-		attributeKeys?: string[];
+		attributeKeys?: Array<string>;
 	} ];
 };
 
-export type ChangeRangeEvent = {
+export type SelectionChangeRangeEvent = {
 	name: 'change:range';
 	args: [ {
 		directChange: boolean;
 	} ];
 };
 
-export type ChangeAttributeEvent = {
+export type SelectionChangeAttributeEvent = {
 	name: 'change:attribute';
 	args: [ {
 		directChange: boolean;
-		attributeKeys: string[];
+		attributeKeys: Array<string>;
 	} ];
 };
 

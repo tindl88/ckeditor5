@@ -31,7 +31,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	 * @private
 	 * @member {Object[]}
 	 */
-	private readonly _items: T[];
+	private readonly _items: Array<T>;
 
 	/**
 	 * The internal map of items in the collection.
@@ -88,64 +88,47 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	 * @private
 	 * @member {Array}
 	 */
-	private _skippedIndexesFromExternal: number[];
+	private _skippedIndexesFromExternal: Array<number>;
 
-	/**
-	 * Creates a new Collection instance.
-	 *
-	 * You can first create a collection and then add new items using the {@link #add} method:
-	 *
-	 * ```ts
-	 *	const collection = new Collection();
-	 *
-	 *	collection.add( { id: 'John' } );
-	 *	console.log( collection.get( 0 ) ); // -> { id: 'John' }
-	 * ```
-	 *
-	 * You can always pass a configuration object as the last argument of the constructor:
-	 *
-	 * ```ts
-	 *	const emptyCollection = new Collection( { idProperty: 'name' } );
-	 *	emptyCollection.add( { name: 'John' } );
-	 *	console.log( collection.get( 'John' ) ); // -> { name: 'John' }
-	 *
-	 *	const nonEmptyCollection = new Collection( [ { name: 'John' } ], { idProperty: 'name' } );
-	 *	nonEmptyCollection.add( { name: 'George' } );
-	 *	console.log( collection.get( 'George' ) ); // -> { name: 'George' }
-	 *	console.log( collection.get( 'John' ) ); // -> { name: 'John' }
-	 * ```
-	 */
 	constructor( options?: { readonly idProperty?: I } );
+	constructor( initialItems: Iterable<T>, options?: { readonly idProperty?: I } );
 
 	/**
 	 * Creates a new Collection instance.
 	 *
 	 * You can provide an iterable of initial items the collection will be created with:
 	 *
-	 * ```ts
-	 *	const collection = new Collection( [ { id: 'John' }, { id: 'Mike' } ] );
+	 *		const collection = new Collection( [ { id: 'John' }, { id: 'Mike' } ] );
 	 *
-	 *	console.log( collection.get( 0 ) ); // -> { id: 'John' }
-	 *	console.log( collection.get( 1 ) ); // -> { id: 'Mike' }
-	 *	console.log( collection.get( 'Mike' ) ); // -> { id: 'Mike' }
-	 * ```
+	 *		console.log( collection.get( 0 ) ); // -> { id: 'John' }
+	 *		console.log( collection.get( 1 ) ); // -> { id: 'Mike' }
+	 *		console.log( collection.get( 'Mike' ) ); // -> { id: 'Mike' }
 	 *
-	 * You can always pass a configuration object as the last argument
+	 * Or you can first create a collection and then add new items using the {@link #add} method:
+	 *
+	 *		const collection = new Collection();
+	 *
+	 *		collection.add( { id: 'John' } );
+	 *		console.log( collection.get( 0 ) ); // -> { id: 'John' }
+	 *
+	 * Whatever option you choose, you can always pass a configuration object as the last argument
 	 * of the constructor:
 	 *
-	 * ```ts
-	 *	const emptyCollection = new Collection( { idProperty: 'name' } );
-	 *	emptyCollection.add( { name: 'John' } );
-	 *	console.log( collection.get( 'John' ) ); // -> { name: 'John' }
+	 *		const emptyCollection = new Collection( { idProperty: 'name' } );
+	 *		emptyCollection.add( { name: 'John' } );
+	 *		console.log( collection.get( 'John' ) ); // -> { name: 'John' }
 	 *
-	 *	const nonEmptyCollection = new Collection( [ { name: 'John' } ], { idProperty: 'name' } );
-	 *	nonEmptyCollection.add( { name: 'George' } );
-	 *	console.log( collection.get( 'George' ) ); // -> { name: 'George' }
-	 *	console.log( collection.get( 'John' ) ); // -> { name: 'John' }
-	 * ```
+	 *		const nonEmptyCollection = new Collection( [ { name: 'John' } ], { idProperty: 'name' } );
+	 *		nonEmptyCollection.add( { name: 'George' } );
+	 *		console.log( collection.get( 'George' ) ); // -> { name: 'George' }
+	 *		console.log( collection.get( 'John' ) ); // -> { name: 'John' }
+	 *
+	 * @param {Iterable.<Object>|Object} [initialItemsOrOptions] The initial items of the collection or
+	 * the options object.
+	 * @param {Object} [options={}] The options object, when the first argument is an array of initial items.
+	 * @param {String} [options.idProperty='id'] The name of the property which is used to identify an item.
+	 * Items that do not have such a property will be assigned one when added to the collection.
 	 */
-	constructor( initialItems: Iterable<T>, options?: { readonly idProperty?: I } );
-
 	constructor( initialItemsOrOptions: Iterable<T> | { readonly idProperty?: I } = {}, options: { readonly idProperty?: I } = {} ) {
 		super();
 
@@ -247,12 +230,12 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 			this._items.splice( currentItemIndex, 0, item );
 			this._itemMap.set( itemId, item );
 
-			this.fire<AddEvent<T>>( 'add', item, currentItemIndex );
+			this.fire<CollectionAddEvent<T>>( 'add', item, currentItemIndex );
 
 			offset++;
 		}
 
-		this.fire<ChangeEvent<T>>( 'change', {
+		this.fire<CollectionChangeEvent<T>>( 'change', {
 			added: items,
 			removed: [],
 			index
@@ -333,7 +316,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	public remove( subject: T | number | string ): T {
 		const [ item, index ] = this._remove( subject );
 
-		this.fire<ChangeEvent<T>>( 'change', {
+		this.fire<CollectionChangeEvent<T>>( 'change', {
 			added: [],
 			removed: [ item ],
 			index
@@ -354,7 +337,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	public map<U>(
 		callback: ( item: T, index: number ) => U,
 		ctx?: any
-	): U[] {
+	): Array<U> {
 		return this._items.map( callback, ctx );
 	}
 
@@ -386,7 +369,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	public filter(
 		callback: ( item: T, index: number ) => boolean,
 		ctx?: any
-	): T[] {
+	): Array<T> {
 		return this._items.filter( callback, ctx );
 	}
 
@@ -409,7 +392,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 			this._remove( 0 );
 		}
 
-		this.fire<ChangeEvent<T>>( 'change', {
+		this.fire<CollectionChangeEvent<T>>( 'change', {
 			added: [],
 			removed: removedItems,
 			index: 0
@@ -640,10 +623,10 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 		}
 
 		// Synchronize the with collection as new items are added.
-		this.listenTo<AddEvent<S>>( externalCollection, 'add', addItem );
+		this.listenTo<CollectionAddEvent<S>>( externalCollection, 'add', addItem );
 
 		// Synchronize the with collection as new items are removed.
-		this.listenTo<RemoveEvent<S>>( externalCollection, 'remove', ( evt, externalItem, index ) => {
+		this.listenTo<CollectionRemoveEvent<S>>( externalCollection, 'remove', ( evt, externalItem, index ) => {
 			const item = this._bindToExternalToInternalMap.get( externalItem );
 
 			if ( item ) {
@@ -662,7 +645,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 				}
 
 				return result;
-			}, [] as number[] );
+			}, [] as Array<number> );
 		} );
 	}
 
@@ -760,7 +743,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 		this._bindToInternalToExternalMap.delete( item );
 		this._bindToExternalToInternalMap.delete( externalItem );
 
-		this.fire<RemoveEvent<T>>( 'remove', item, index! );
+		this.fire<CollectionRemoveEvent<T>>( 'remove', item, index! );
 
 		return [ item, index! ];
 	}
@@ -773,28 +756,38 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	public [ Symbol.iterator ](): Iterator<T> {
 		return this._items[ Symbol.iterator ]();
 	}
+
+	/**
+	 * Fired when an item is added to the collection.
+	 *
+	 * @event add
+	 * @param {Object} item The added item.
+	 */
+
+	/**
+	 * Fired when the collection was changed due to adding or removing items.
+	 *
+	 * @event change
+	 * @param {Iterable.<Object>} added A list of added items.
+	 * @param {Iterable.<Object>} removed A list of removed items.
+	 * @param {Number} index An index where the addition or removal occurred.
+	 */
+
+	/**
+	 * Fired when an item is removed from the collection.
+	 *
+	 * @event remove
+	 * @param {Object} item The removed item.
+	 * @param {Number} index Index from which item was removed.
+	 */
 }
 
-/**
- * Fired when an item is added to the collection.
- *
- * @eventName add
- * @param {Object} item The added item.
- */
-export type AddEvent<T = any> = {
+export type CollectionAddEvent<T = any> = {
 	name: 'add';
 	args: [ item: T, index: number ];
 };
 
-/**
- * Fired when the collection was changed due to adding or removing items.
- *
- * @eventName change
- * @param {Iterable.<Object>} added A list of added items.
- * @param {Iterable.<Object>} removed A list of removed items.
- * @param {Number} index An index where the addition or removal occurred.
- */
-export type ChangeEvent<T = any> = {
+export type CollectionChangeEvent<T = any> = {
 	name: 'change';
 	args: [ {
 		added: Iterable<T>;
@@ -803,14 +796,7 @@ export type ChangeEvent<T = any> = {
 	} ];
 };
 
-/**
- * Fired when an item is removed from the collection.
- *
- * @eventName remove
- * @param {Object} item The removed item.
- * @param {Number} index Index from which item was removed.
- */
-export type RemoveEvent<T = any> = {
+export type CollectionRemoveEvent<T = any> = {
 	name: 'remove';
 	args: [ item: T, index: number ];
 };
