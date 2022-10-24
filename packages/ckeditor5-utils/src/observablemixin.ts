@@ -918,55 +918,6 @@ export interface Observable extends Emitter {
 	 * @param {String} methodName Name of the method to decorate.
 	 */
 	decorate( methodName: keyof this & string ): void;
-
-	/**
-	 * Fired when a property changed value.
-	 *
-	 *		observable.set( 'prop', 1 );
-	 *
-	 *		observable.on( 'change:prop', ( evt, propertyName, newValue, oldValue ) => {
-	 *			console.log( `${ propertyName } has changed from ${ oldValue } to ${ newValue }` );
-	 *		} );
-	 *
-	 *		observable.prop = 2; // -> 'prop has changed from 1 to 2'
-	 *
-	 * @event change:{property}
-	 * @param {String} name The property name.
-	 * @param {*} value The new property value.
-	 * @param {*} oldValue The previous property value.
-	 */
-
-	/**
-	 * Fired when a property value is going to be set but is not set yet (before the `change` event is fired).
-	 *
-	 * You can control the final value of the property by using
-	 * the {@link module:utils/eventinfo~EventInfo#return event's `return` property}.
-	 *
-	 *		observable.set( 'prop', 1 );
-	 *
-	 *		observable.on( 'set:prop', ( evt, propertyName, newValue, oldValue ) => {
-	 *			console.log( `Value is going to be changed from ${ oldValue } to ${ newValue }` );
-	 *			console.log( `Current property value is ${ observable[ propertyName ] }` );
-	 *
-	 *			// Let's override the value.
-	 *			evt.return = 3;
-	 *		} );
-	 *
-	 *		observable.on( 'change:prop', ( evt, propertyName, newValue, oldValue ) => {
-	 *			console.log( `Value has changed from ${ oldValue } to ${ newValue }` );
-	 *		} );
-	 *
-	 *		observable.prop = 2; // -> 'Value is going to be changed from 1 to 2'
-	 *		                     // -> 'Current property value is 1'
-	 *		                     // -> 'Value has changed from 1 to 3'
-	 *
-	 * **Note:** The event is fired even when the new value is the same as the old value.
-	 *
-	 * @event set:{property}
-	 * @param {String} name The property name.
-	 * @param {*} value The new property value.
-	 * @param {*} oldValue The previous property value.
-	 */
 }
 
 interface ObservableInternal extends Observable {
@@ -979,11 +930,58 @@ interface ObservableInternal extends Observable {
 	[ boundObservablesSymbol]?: Map<Observable, Record<string, Set<Binding>>>;
 }
 
+/**
+ * Fired when a property changed value.
+ *
+ *		observable.set( 'prop', 1 );
+ *
+ *		observable.on( 'change:prop', ( evt, propertyName, newValue, oldValue ) => {
+ *			console.log( `${ propertyName } has changed from ${ oldValue } to ${ newValue }` );
+ *		} );
+ *
+ *		observable.prop = 2; // -> 'prop has changed from 1 to 2'
+ *
+ * @eventName change:{property}
+ * @param {String} [name] The property name.
+ * @param {*} value The new property value.
+ * @param {*} oldValue The previous property value.
+ */
 export type ObservableChangeEvent<TValue = any> = {
 	name: 'change' | `change:${ string }`;
 	args: [ name: string, value: TValue, oldValue: TValue ];
 };
 
+/**
+ * Fired when a property value is going to be set but is not set yet (before the `change` event is fired).
+ *
+ * You can control the final value of the property by using
+ * the {@link module:utils/eventinfo~EventInfo#return event's `return` property}.
+ *
+ *		observable.set( 'prop', 1 );
+ *
+ *		observable.on( 'set:prop', ( evt, propertyName, newValue, oldValue ) => {
+ *			console.log( `Value is going to be changed from ${ oldValue } to ${ newValue }` );
+ *			console.log( `Current property value is ${ observable[ propertyName ] }` );
+ *
+ *			// Let's override the value.
+ *			evt.return = 3;
+ *		} );
+ *
+ *		observable.on( 'change:prop', ( evt, propertyName, newValue, oldValue ) => {
+ *			console.log( `Value has changed from ${ oldValue } to ${ newValue }` );
+ *		} );
+ *
+ *		observable.prop = 2; // -> 'Value is going to be changed from 1 to 2'
+ *		                     // -> 'Current property value is 1'
+ *		                     // -> 'Value has changed from 1 to 3'
+ *
+ * **Note:** The event is fired even when the new value is the same as the old value.
+ *
+ * @eventName set:{property}
+ * @param {String} name The property name.
+ * @param {*} value The new property value.
+ * @param {*} oldValue The previous property value.
+ */
 export type ObservableSetEvent<TValue = any> = {
 	name: 'set' | `set:${ string }`;
 	args: [ name: string, value: TValue, oldValue: TValue ];
