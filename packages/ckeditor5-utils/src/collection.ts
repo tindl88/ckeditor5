@@ -27,25 +27,16 @@ import isIterable from './isiterable';
 export default class Collection<T extends { [ id in I ]?: string }, I extends string = 'id'> extends Emitter implements Iterable<T> {
 	/**
 	 * The internal list of items in the collection.
-	 *
-	 * @private
-	 * @member {Object[]}
 	 */
 	private readonly _items: Array<T>;
 
 	/**
 	 * The internal map of items in the collection.
-	 *
-	 * @private
-	 * @member {Map}
 	 */
 	private readonly _itemMap: Map<string, T>;
 
 	/**
 	 * The name of the property which is considered to identify an item.
-	 *
-	 * @private
-	 * @member {String}
 	 */
 	private readonly _idProperty: I;
 
@@ -53,7 +44,6 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	 * A collection instance this collection is bound to as a result
 	 * of calling {@link #bindTo} method.
 	 *
-	 * @private
 	 * @member {module:utils/collection~Collection} #_bindToCollection
 	 */
 	private _bindToCollection?: Collection<any, any> | null;
@@ -64,9 +54,6 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	 * necessary to properly remove items bound to another collection.
 	 *
 	 * See {@link #_bindToInternalToExternalMap}.
-	 *
-	 * @private
-	 * @member {WeakMap}
 	 */
 	private readonly _bindToExternalToInternalMap: WeakMap<any, T>;
 
@@ -166,7 +153,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	/**
 	 * Returns the first item from the collection or null when collection is empty.
 	 *
-	 * @returns {Object|null} The first item or `null` if collection is empty.
+	 * @returns The first item or `null` if collection is empty.
 	 */
 	public get first(): T | null {
 		return this._items[ 0 ] || null;
@@ -175,7 +162,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	/**
 	 * Returns the last item from the collection or null when collection is empty.
 	 *
-	 * @returns {Object|null} The last item or `null` if collection is empty.
+	 * @returns The last item or `null` if collection is empty.
 	 */
 	public get last(): T | null {
 		return this._items[ this.length - 1 ] || null;
@@ -187,9 +174,8 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	 * If the item does not have an id, then it will be automatically generated and set on the item.
 	 *
 	 * @chainable
-	 * @param {Object} item
-	 * @param {Number} [index] The position of the item in the collection. The item
-	 * is pushed to the collection when `index` not specified.
+	 * @param item
+	 * @param index The position of the item in the collection. The item is pushed to the collection when `index` not specified.
 	 * @fires add
 	 * @fires change
 	 */
@@ -756,37 +742,27 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	public [ Symbol.iterator ](): Iterator<T> {
 		return this._items[ Symbol.iterator ]();
 	}
-
-	/**
-	 * Fired when an item is added to the collection.
-	 *
-	 * @event add
-	 * @param {Object} item The added item.
-	 */
-
-	/**
-	 * Fired when the collection was changed due to adding or removing items.
-	 *
-	 * @event change
-	 * @param {Iterable.<Object>} added A list of added items.
-	 * @param {Iterable.<Object>} removed A list of removed items.
-	 * @param {Number} index An index where the addition or removal occurred.
-	 */
-
-	/**
-	 * Fired when an item is removed from the collection.
-	 *
-	 * @event remove
-	 * @param {Object} item The removed item.
-	 * @param {Number} index Index from which item was removed.
-	 */
 }
 
+/**
+ * Fired when an item is added to the collection.
+ *
+ * @eventName add
+ * @param {Object} item The added item.
+ */
 export type CollectionAddEvent<T = any> = {
 	name: 'add';
 	args: [ item: T, index: number ];
 };
 
+/**
+ * Fired when the collection was changed due to adding or removing items.
+ *
+ * @eventName change
+ * @param {Iterable.<Object>} added A list of added items.
+ * @param {Iterable.<Object>} removed A list of removed items.
+ * @param {Number} index An index where the addition or removal occurred.
+ */
 export type CollectionChangeEvent<T = any> = {
 	name: 'change';
 	args: [ {
@@ -796,6 +772,13 @@ export type CollectionChangeEvent<T = any> = {
 	} ];
 };
 
+/**
+ * Fired when an item is removed from the collection.
+ *
+ * @eventName remove
+ * @param {Object} item The removed item.
+ * @param {Number} index Index from which item was removed.
+ */
 export type CollectionRemoveEvent<T = any> = {
 	name: 'remove';
 	args: [ item: T, index: number ];
