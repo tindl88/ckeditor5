@@ -7,7 +7,7 @@
  * @module utils/collection
  */
 
-import { Emitter } from './emittermixin';
+import EmitterMixin from './emittermixin';
 import CKEditorError from './ckeditorerror';
 import uid from './uid';
 import isIterable from './isiterable';
@@ -23,9 +23,8 @@ import isIterable from './isiterable';
  * configured through the constructor of the collection.
  *
  * @typeParam T The type of the collection element.
- * @typeParam I The name of the identifier.
  */
-export default class Collection<T extends { [ id in I ]?: string }, I extends string = 'id'> extends Emitter implements Iterable<T> {
+export default class Collection<T extends Record<string, any>> extends EmitterMixin() implements Iterable<T> {
 	/**
 	 * The internal list of items in the collection.
 	 */
@@ -39,13 +38,13 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	/**
 	 * The name of the property which is considered to identify an item.
 	 */
-	private readonly _idProperty: I;
+	private readonly _idProperty: string;
 
 	/**
 	 * A collection instance this collection is bound to as a result
 	 * of calling {@link #bindTo} method.
 	 */
-	private _bindToCollection?: Collection<any, any> | null;
+	private _bindToCollection?: Collection<any> | null;
 
 	/**
 	 * A helper mapping external items of a bound collection ({@link #bindTo})
@@ -76,7 +75,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	 * You can pass a configuration object as the argument of the constructor:
 	 *
 	 * ```ts
-	 * const emptyCollection = new Collection<{ name: string }, 'name'>( { idProperty: 'name' } );
+	 * const emptyCollection = new Collection<{ name: string }>( { idProperty: 'name' } );
 	 * emptyCollection.add( { name: 'John' } );
 	 * console.log( collection.get( 'John' ) ); // -> { name: 'John' }
 	 * ```
@@ -94,7 +93,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	 * @param options.idProperty The name of the property which is used to identify an item.
 	 * Items that do not have such a property will be assigned one when added to the collection.
 	 */
-	constructor( options?: { readonly idProperty?: I } );
+	constructor( options?: { readonly idProperty?: string } );
 
 	/**
 	 * Creates a new Collection instance with specified initial items.
@@ -110,7 +109,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	 * You can always pass a configuration object as the last argument of the constructor:
 	 *
 	 * ```ts
-	 * const nonEmptyCollection = new Collection<{ name: string }, 'name'>( [ { name: 'John' } ], { idProperty: 'name' } );
+	 * const nonEmptyCollection = new Collection<{ name: string }>( [ { name: 'John' } ], { idProperty: 'name' } );
 	 * nonEmptyCollection.add( { name: 'George' } );
 	 * console.log( collection.get( 'George' ) ); // -> { name: 'George' }
 	 * console.log( collection.get( 'John' ) ); // -> { name: 'John' }
@@ -121,9 +120,12 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	 * @param options.idProperty The name of the property which is used to identify an item.
 	 * Items that do not have such a property will be assigned one when added to the collection.
 	 */
-	constructor( initialItems: Iterable<T>, options?: { readonly idProperty?: I } );
+	constructor( initialItems: Iterable<T>, options?: { readonly idProperty?: string } );
 
-	constructor( initialItemsOrOptions: Iterable<T> | { readonly idProperty?: I } = {}, options: { readonly idProperty?: I } = {} ) {
+	constructor(
+		initialItemsOrOptions: Iterable<T> | { readonly idProperty?: string } = {},
+		options: { readonly idProperty?: string } = {}
+	) {
 		super();
 
 		const hasInitialItems = isIterable( initialItemsOrOptions );
@@ -134,7 +136,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 
 		this._items = [];
 		this._itemMap = new Map();
-		this._idProperty = options.idProperty || 'id' as I;
+		this._idProperty = options.idProperty || 'id';
 		this._bindToExternalToInternalMap = new WeakMap();
 		this._bindToInternalToExternalMap = new WeakMap();
 		this._skippedIndexesFromExternal = [];
@@ -314,6 +316,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	/**
 	 * Executes the callback for each item in the collection and composes an array or values returned by this callback.
 	 *
+	 * @typeParam U The result type of the callback.
 	 * @param callback
 	 * @param ctx Context in which the `callback` will be called.
 	 * @returns The result of mapping.
@@ -393,7 +396,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	 * 	}
 	 * }
 	 *
-	 * const source = new Collection<{ label: string }, 'label'>( { idProperty: 'label' } );
+	 * const source = new Collection<{ label: string }>( { idProperty: 'label' } );
 	 * const target = new Collection<FactoryClass>();
 	 *
 	 * target.bindTo( source ).as( FactoryClass );
@@ -428,7 +431,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	 * 	}
 	 * }
 	 *
-	 * const source = new Collection<{ label: string }, 'label'>( { idProperty: 'label' } );
+	 * const source = new Collection<{ label: string }>( { idProperty: 'label' } );
 	 * const target = new Collection<FooClass | BarClass>();
 	 *
 	 * target.bindTo( source ).using( ( item ) => {
@@ -486,11 +489,12 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	 *
 	 * **Note**: {@link #clear} can be used to break the binding.
 	 *
+	 * @typeParam S The type of `externalCollection` element.
 	 * @param externalCollection A collection to be bound.
 	 * @returns The binding chain object.
 	 */
-	public bindTo<S extends { [id in I2]?: string }, I2 extends string>(
-		externalCollection: Collection<S, I2>
+	public bindTo<S extends Record<string, any>>(
+		externalCollection: Collection<S>
 	): CollectionBindToChain<S, T> {
 		if ( this._bindToCollection ) {
 			/**
@@ -512,7 +516,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 				if ( typeof callbackOrProperty == 'function' ) {
 					this._setUpBindToBinding<S>( callbackOrProperty );
 				} else {
-					this._setUpBindToBinding<S>( item => item[ callbackOrProperty ] as any );
+					this._setUpBindToBinding<S>( item => item[ callbackOrProperty ] );
 				}
 			}
 		};
@@ -523,7 +527,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	 *
 	 * @param factory A function which produces collection items.
 	 */
-	private _setUpBindToBinding<S extends object>( factory: ( item: S ) => T | null ): void {
+	private _setUpBindToBinding<S>( factory: ( item: S ) => T | null ): void {
 		const externalCollection = this._bindToCollection!;
 
 		// Adds the item to the collection once a change has been done to the external collection.
@@ -647,7 +651,7 @@ export default class Collection<T extends { [ id in I ]?: string }, I extends st
 	 *
 	 * @param item Item to be added.
 	 */
-	private _getItemIdBeforeAdding( item: { [ id in I ]?: string } ): string {
+	private _getItemIdBeforeAdding( item: any ): string {
 		const idProperty = this._idProperty;
 		let itemId: string | undefined;
 
@@ -804,7 +808,7 @@ export interface CollectionBindToChain<S, T> {
 	/**
 	 * Creates a callback or a property binding.
 	 *
-	 * @param callbackOrProperty  When the function is passed, it should return
+	 * @param callbackOrProperty When the function is passed, it should return
 	 * the collection items. When the string is provided, the property value is used to create the bound collection items.
 	 */
 	using( callbackOrProperty: keyof S | ( ( item: S ) => T | null ) ): void;
