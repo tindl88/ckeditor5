@@ -4,7 +4,7 @@
  */
 
 /**
- * @module module:engine/view/upcastwriter
+ * @module view/upcastwriter
  */
 
 import DocumentFragment from './documentfragment';

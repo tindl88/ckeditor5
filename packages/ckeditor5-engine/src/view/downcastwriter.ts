@@ -4,7 +4,7 @@
  */
 
 /**
- * @module module:engine/view/downcastwriter
+ * @module view/downcastwriter
  */
 
 import Position from './position';
