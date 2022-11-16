@@ -58,7 +58,7 @@ ClassicEditor
 
 ## HTML structure
 
-When you call {@link module:core/editor/utils/dataapimixin~DataApi#function-getData `editor.getData()`}, a to-do list will be represented as the following HTML:
+When you call {@link module:core/editor/utils/dataapimixin~DataApi#getData `editor.getData()`}, a to-do list will be represented as the following HTML:
 
 ```html
 <ul class="todo-list">
