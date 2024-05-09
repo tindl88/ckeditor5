@@ -11,12 +11,15 @@ import UploadAdapter from '@ckeditor/ckeditor5-adapter-ckfinder/src/uploadadapte
 import Autoformat from '@ckeditor/ckeditor5-autoformat/src/autoformat';
 import Bold from '@ckeditor/ckeditor5-basic-styles/src/bold';
 import Italic from '@ckeditor/ckeditor5-basic-styles/src/italic';
+import Underline from '@ckeditor/ckeditor5-basic-styles/src/underline';
+import Strikethrough from '@ckeditor/ckeditor5-basic-styles/src/strikethrough';
 import BlockQuote from '@ckeditor/ckeditor5-block-quote/src/blockquote';
 import CKBox from '@ckeditor/ckeditor5-ckbox/src/ckbox';
 import CKFinder from '@ckeditor/ckeditor5-ckfinder/src/ckfinder';
 import EasyImage from '@ckeditor/ckeditor5-easy-image/src/easyimage';
 import Heading from '@ckeditor/ckeditor5-heading/src/heading';
 import Image from '@ckeditor/ckeditor5-image/src/image';
+import ImageResize from '@ckeditor/ckeditor5-image/src/imageresize';
 import ImageCaption from '@ckeditor/ckeditor5-image/src/imagecaption';
 import ImageStyle from '@ckeditor/ckeditor5-image/src/imagestyle';
 import ImageToolbar from '@ckeditor/ckeditor5-image/src/imagetoolbar';
@@ -32,7 +35,12 @@ import Table from '@ckeditor/ckeditor5-table/src/table';
 import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 import TextTransformation from '@ckeditor/ckeditor5-typing/src/texttransformation';
 import CloudServices from '@ckeditor/ckeditor5-cloud-services/src/cloudservices';
-import Alignment from '@ckeditor/ckeditor5-alignment/src/alignment'; // <--- ADDED
+import SourceEditing from '@ckeditor/ckeditor5-source-editing/src/sourceediting';
+import Alignment from '@ckeditor/ckeditor5-alignment/src/alignment';
+import GeneralHtmlSupport from '@ckeditor/ckeditor5-html-support/src/generalhtmlsupport';
+import HtmlEmbedEditing from '@ckeditor/ckeditor5-html-embed/src/htmlembedediting';
+
+import FileManager from './file-manager/file-manager';
 
 export default class ClassicEditor extends ClassicEditorBase {}
 
@@ -43,6 +51,8 @@ ClassicEditor.builtinPlugins = [
 	Autoformat,
 	Bold,
 	Italic,
+	Underline,
+	Strikethrough,
 	BlockQuote,
 	CKBox,
 	CKFinder,
@@ -50,6 +60,7 @@ ClassicEditor.builtinPlugins = [
 	EasyImage,
 	Heading,
 	Image,
+	ImageResize,
 	ImageCaption,
 	ImageStyle,
 	ImageToolbar,
@@ -64,7 +75,11 @@ ClassicEditor.builtinPlugins = [
 	Table,
 	TableToolbar,
 	TextTransformation,
-	Alignment
+	Alignment,
+	GeneralHtmlSupport,
+	HtmlEmbedEditing,
+	SourceEditing,
+	FileManager
 ];
 
 // Editor configuration.
@@ -72,39 +87,47 @@ ClassicEditor.defaultConfig = {
 	toolbar: {
 		items: [
 			'heading',
+			'undo',
+			'redo',
 			'|',
 			'bold',
 			'italic',
-			'link',
+			'underline',
+			'strikethrough',
+			'|',
+			'alignment',
 			'bulletedList',
 			'numberedList',
-			'|',
 			'outdent',
 			'indent',
-			'|',
-			'uploadImage',
+			'link',
 			'blockQuote',
 			'insertTable',
 			'mediaEmbed',
-			'undo',
-			'redo'
+			'fileManager',
+			'sourceEditing'
 		]
 	},
 	image: {
 		toolbar: [
-			'imageStyle:inline',
-			'imageStyle:block',
-			'imageStyle:side',
+			'imageStyle:alignLeft',
+			'imageStyle:alignRight',
+			'|',
+			'imageStyle:alignBlockLeft',
+			'imageStyle:alignCenter',
+			'imageStyle:alignBlockRight',
 			'|',
 			'toggleImageCaption',
 			'imageTextAlternative'
 		]
 	},
 	table: {
-		contentToolbar: [
-			'tableColumn',
-			'tableRow',
-			'mergeTableCells'
+		contentToolbar: [ 'tableColumn', 'tableRow', 'mergeTableCells' ]
+	},
+	htmlSupport: {
+		allow: [
+			{ name: 'audio', attributes: true, classes: true, styles: true },
+			{ name: 'video', attributes: true, classes: true, styles: true }
 		]
 	},
 	// This value must be kept in sync with the language defined in webpack.config.js.
